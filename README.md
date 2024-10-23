@@ -1,21 +1,8 @@
 # Bitbucket Runner Autoscaler
-This module deploys a Helm chart for the Bitbucket runner autoscaler and supports deploying Bitbucket runner groups, as well as the AWS IAM components needed for Bitbucket runners to authenticate against AWS resources.
-
-## Cross-Account IAM Access for Runners
-You have two options for setting up cross-account IAM access:
-
-- Create an IAM Role and OIDC Provider in Another AWS Account: Set up an IAM role and OIDC provider for the same Bitbucket workspace in your other AWS account, and then assume that IAM role from your current account.
-
-- Use the `additional_assumable_iam_roles` Variable: Utilize the additional\_assumable\_iam\_roles variable, which adds sts:AssumeRole permissions for the specified roles to the IAM role where your runners are deployed. In your pipelines, you can then assume roles deployed in your other AWS accounts.
-
-## Use Specialized AWS IAM Roles for Runners
-The IAM role created by this module is opinionated and limited, it can only interact with ECR images. If you require the capability to manage additional AWS services, it is advised to create separate IAM roles. Configure these roles with assume policy conditions that restrict authentication to specific repositories and environments within those repositories.
-
-## OIDC Thumbprint
-To generate the OIDC thumbprint for the Bitbucket provider, set by the `bitbucket_oidc_thumbprint` variable, follow [this guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html).
-
 [![Terraform validate](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml)
 [![pre-commit](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml)
+
+This module deploys a Helm chart for the Bitbucket runner autoscaler and supports deploying Bitbucket runner groups, as well as the AWS IAM components needed for Bitbucket runners to authenticate against AWS resources.
 
 ---
 
@@ -63,17 +50,11 @@ Refer to the [IAM example](examples/basic/iam.tf) for guidance on creating an as
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_addon"></a> [addon](#module\_addon) | git::https://github.com/lablabs/terraform-aws-eks-universal-addon.git//modules/addon | v0.0.6 |
+| <a name="module_addon-oidc"></a> [addon-oidc](#module\_addon-oidc) | ./modules/addon-oidc | n/a |
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_iam_openid_connect_provider.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_openid_connect_provider) | resource |
-| [aws_iam_policy.assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_policy_document.assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [utils_deep_merge_yaml.values](https://registry.terraform.io/providers/cloudposse/utils/latest/docs/data-sources/deep_merge_yaml) | data source |
 > [!IMPORTANT]
 > Variables defined in [variables-addon.tf](variables-addon.tf) defaults to `null` to have them overridable by the addon configuration defined though the [`local.addon.*`](main.tf) local variable with some default values defined in [addon.tf](addon.tf).
@@ -81,7 +62,6 @@ Refer to the [IAM example](examples/basic/iam.tf) for guidance on creating an as
 
 | Name | Description | Type |
 |------|-------------|------|
-| <a name="input_additional_assumable_iam_roles"></a> [additional\_assumable\_iam\_roles](#input\_additional\_assumable\_iam\_roles) | Additional IAM roles that the runner role can assume | `list(string)` |
 | <a name="input_argo_apiversion"></a> [argo\_apiversion](#input\_argo\_apiversion) | ArgoCD Application apiVersion. Defaults to `"argoproj.io/v1alpha1"`. | `string` |
 | <a name="input_argo_destination_server"></a> [argo\_destination\_server](#input\_argo\_destination\_server) | Destination server for ArgoCD Application. Defaults to `"https://kubernetes.default.svc"`. | `string` |
 | <a name="input_argo_enabled"></a> [argo\_enabled](#input\_argo\_enabled) | If set to true, the module will be deployed as ArgoCD application, otherwise it will be deployed as a Helm release. Defaults to `false`. | `bool` |
@@ -101,8 +81,7 @@ Refer to the [IAM example](examples/basic/iam.tf) for guidance on creating an as
 | <a name="input_argo_project"></a> [argo\_project](#input\_argo\_project) | ArgoCD Application project. Defaults to `default`. | `string` |
 | <a name="input_argo_spec"></a> [argo\_spec](#input\_argo\_spec) | ArgoCD Application spec configuration. Override or create additional spec parameters. Defaults to `{}`. | `any` |
 | <a name="input_argo_sync_policy"></a> [argo\_sync\_policy](#input\_argo\_sync\_policy) | ArgoCD syncPolicy manifest parameter. Defaults to `{}`. | `any` |
-| <a name="input_bitbucket_oidc_thumbprint"></a> [bitbucket\_oidc\_thumbprint](#input\_bitbucket\_oidc\_thumbprint) | Bitbucket OIDC thumbprint | `string` |
-| <a name="input_bitbucket_workspace_id"></a> [bitbucket\_workspace\_id](#input\_bitbucket\_workspace\_id) | Bitbucket workspace ID | `string` |
+| <a name="input_bitbucket_workspace_name"></a> [bitbucket\_workspace\_name](#input\_bitbucket\_workspace\_name) | Bitbucket workspace name | `string` |
 | <a name="input_bitbucket_workspace_uuid"></a> [bitbucket\_workspace\_uuid](#input\_bitbucket\_workspace\_uuid) | Bitbucket workspace UUID | `string` |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources. | `bool` |
 | <a name="input_helm_atomic"></a> [helm\_atomic](#input\_helm\_atomic) | If set, installation process purges chart on fail. The wait flag will be set automatically if atomic is used. Defaults to `false`. | `bool` |
@@ -138,18 +117,31 @@ Refer to the [IAM example](examples/basic/iam.tf) for guidance on creating an as
 | <a name="input_helm_timeout"></a> [helm\_timeout](#input\_helm\_timeout) | Time in seconds to wait for any individual Kubernetes operation (like Jobs for hooks). Defaults to `300`. | `number` |
 | <a name="input_helm_wait"></a> [helm\_wait](#input\_helm\_wait) | Will wait until all Helm release resources are in a ready state before marking the release as successful. It will wait for as long as timeout. Defaults to `false`. | `bool` |
 | <a name="input_helm_wait_for_jobs"></a> [helm\_wait\_for\_jobs](#input\_helm\_wait\_for\_jobs) | If wait is enabled, will wait until all Helm Jobs have been completed before marking the release as successful. It will wait for as long as timeout. Defaults to `false`. | `bool` |
-| <a name="input_iam_oidc_provider_create"></a> [iam\_oidc\_provider\_create](#input\_iam\_oidc\_provider\_create) | Whether to create IAM OIDC provider for Bitbucket | `bool` |
-| <a name="input_iam_role_create"></a> [iam\_role\_create](#input\_iam\_role\_create) | Whether to create IAM role for the runner | `bool` |
-| <a name="input_iam_role_name_prefix"></a> [iam\_role\_name\_prefix](#input\_iam\_role\_name\_prefix) | The IAM role name prefix for the runner | `string` |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The Kubernetes Namespace in which the Helm chart will be installed. Defaults to `local.addon.name`. | `string` |
+| <a name="input_oidc_additional_policies"></a> [oidc\_additional\_policies](#input\_oidc\_additional\_policies) | Map of the additional policies to be attached to oidc role. Where key is arbitrary id and value is policy ARN. Defaults to `{}`. | `map(string)` |
+| <a name="input_oidc_assume_role_arns"></a> [oidc\_assume\_role\_arns](#input\_oidc\_assume\_role\_arns) | List of ARNs assumable by the oidc role. Applied only if `oidc_assume_role_enabled` is `true`. | `list(string)` |
+| <a name="input_oidc_assume_role_enabled"></a> [oidc\_assume\_role\_enabled](#input\_oidc\_assume\_role\_enabled) | Whether oidc is allowed to assume role defined by `oidc_assume_role_arn`. Mutually exclusive with `oidc_policy_enabled`. Defaults to `false`. | `bool` |
+| <a name="input_oidc_assume_role_policy_condition_test"></a> [oidc\_assume\_role\_policy\_condition\_test](#input\_oidc\_assume\_role\_policy\_condition\_test) | Specifies the condition test to use for the assume role trust policy. Defaults to `StringLike`. | `string` |
+| <a name="input_oidc_assume_role_policy_condition_values"></a> [oidc\_assume\_role\_policy\_condition\_values](#input\_oidc\_assume\_role\_policy\_condition\_values) | Specifies the values for the assume role trust policy condition. Defaults to `[]`. | `list(string)` |
+| <a name="input_oidc_assume_role_policy_condition_variable"></a> [oidc\_assume\_role\_policy\_condition\_variable](#input\_oidc\_assume\_role\_policy\_condition\_variable) | Specifies the variable to use for the assume role trust policy. Defaults to `""`. | `string` |
+| <a name="input_oidc_openid_client_ids"></a> [oidc\_openid\_client\_ids](#input\_oidc\_openid\_client\_ids) | List of client IDs that are allowed to authenticate. Defaults to `[]`. | `list(string)` |
+| <a name="input_oidc_openid_provider_url"></a> [oidc\_openid\_provider\_url](#input\_oidc\_openid\_provider\_url) | oidc provider url. Defaults to `""`. | `string` |
+| <a name="input_oidc_openid_thumbprints"></a> [oidc\_openid\_thumbprints](#input\_oidc\_openid\_thumbprints) | List of thumbprints of the OIDC provider's server certificate. Defaults to `[]`. | `list(string)` |
+| <a name="input_oidc_permissions_boundary"></a> [oidc\_permissions\_boundary](#input\_oidc\_permissions\_boundary) | ARN of the policy that is used to set the permissions boundary for the oidc role. Defaults to `""`. | `string` |
+| <a name="input_oidc_policy"></a> [oidc\_policy](#input\_oidc\_policy) | Policy to be attached to the oidc role. Applied only if `oidc_policy_enabled` is `true`. | `string` |
+| <a name="input_oidc_policy_enabled"></a> [oidc\_policy\_enabled](#input\_oidc\_policy\_enabled) | Whether to create IAM policy specified by `oidc_policy`. Mutually exclusive with `oidc_assume_role_enabled`. Defaults to `false`. | `bool` |
+| <a name="input_oidc_role_create"></a> [oidc\_role\_create](#input\_oidc\_role\_create) | Whether to create oidc role and annotate Service Account. Defaults to `true`. | `bool` |
+| <a name="input_oidc_role_name"></a> [oidc\_role\_name](#input\_oidc\_role\_name) | oidc role name. The value is prefixed by `var.oidc_role_name_prefix`. Defaults to addon Helm chart name. | `string` |
+| <a name="input_oidc_role_name_prefix"></a> [oidc\_role\_name\_prefix](#input\_oidc\_role\_name\_prefix) | oidc role name prefix. Defaults to addon oidc component name with `oidc` suffix. | `string` |
+| <a name="input_oidc_tags"></a> [oidc\_tags](#input\_oidc\_tags) | oidc resources tags. Defaults to `{}`. | `map(string)` |
 | <a name="input_settings"></a> [settings](#input\_settings) | Additional Helm sets which will be passed to the Helm chart values. Defaults to `{}`. | `map(any)` |
-| <a name="input_tags"></a> [tags](#input\_tags) | AWS IAM resources tags | `map(string)` |
 | <a name="input_values"></a> [values](#input\_values) | Additional yaml encoded values which will be passed to the Helm chart. Defaults to `""`. | `string` |
 ## Outputs
 
 | Name | Description |
 |------|-------------|
 | <a name="output_addon"></a> [addon](#output\_addon) | The addon module outputs |
+| <a name="output_addon_oidc"></a> [addon\_oidc](#output\_addon\_oidc) | The addon oidc module outputs |
 ## Contributing and reporting issues
 
 Feel free to create an issue in this repository if you have questions, suggestions or feature requests.
