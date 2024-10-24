@@ -16,7 +16,7 @@ variable "helm_chart_version" {
 
 variable "helm_release_name" {
   type        = string
-  default     = null
+  default     = "bitbucket-runner-autoscaler"
   description = "Helm release name. Defaults to `local.addon.name` (required)."
 }
 
@@ -34,7 +34,7 @@ variable "helm_create_namespace" {
 
 variable "namespace" {
   type        = string
-  default     = null
+  default     = "bitbucket-runner-autoscaler"
   description = "The Kubernetes Namespace in which the Helm chart will be installed. Defaults to `local.addon.name`."
 }
 
