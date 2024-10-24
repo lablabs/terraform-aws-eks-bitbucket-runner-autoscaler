@@ -101,3 +101,9 @@ variable "oidc_openid_thumbprints" {
   default     = []
   description = "List of thumbprints of the OIDC provider's server certificate. Defaults to `[]`."
 }
+
+variable "oidc_custom_provider_arn" {
+  type        = string
+  default     = null
+  description = "Specifies a custom OIDC provider ARN. If provided, the module will not create a default OIDC provider. Defaults to `\"\"`."
+}

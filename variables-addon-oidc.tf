@@ -91,6 +91,12 @@ variable "oidc_assume_role_policy_condition_variable" {
   description = "Specifies the variable to use for the assume role trust policy. Defaults to `\"\"`."
 }
 
+variable "oidc_custom_provider_arn" {
+  type        = string
+  default     = null
+  description = "Specifies a custom OIDC provider ARN. If provided, the module will not create a default OIDC provider. Defaults to `\"\"`."
+}
+
 variable "oidc_tags" {
   type        = map(string)
   default     = null

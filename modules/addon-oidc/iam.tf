@@ -4,10 +4,11 @@ locals {
   oidc_role_name           = try(trim("${local.oidc_role_name_prefix}-${var.oidc_role_name}", "-"), "")
   oidc_policy_enabled      = var.oidc_policy_enabled == true && try(length(var.oidc_policy) > 0, false)
   oidc_assume_role_enabled = var.oidc_assume_role_enabled == true && try(length(var.oidc_assume_role_arns) > 0, false)
+  oidc_provider_create     = try(length(var.oidc_custom_provider_arn), 0) == 0
 }
 
 resource "aws_iam_openid_connect_provider" "this" {
-  count = local.oidc_role_create ? 1 : 0
+  count = local.oidc_role_create && local.oidc_provider_create ? 1 : 0
 
   url             = "https://${var.oidc_openid_provider_url}"
   client_id_list  = var.oidc_openid_client_ids
@@ -46,7 +47,7 @@ data "aws_iam_policy_document" "this_oidc" {
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.this[0].arn]
+      identifiers = [try(aws_iam_openid_connect_provider.this[0].arn, var.oidc_custom_provider_arn)]
     }
 
     condition {
