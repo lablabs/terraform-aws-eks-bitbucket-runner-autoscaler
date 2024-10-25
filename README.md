@@ -1,8 +1,9 @@
 # Bitbucket Runner Autoscaler
-[![Terraform validate](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml)
-[![pre-commit](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml)
 
 This module deploys a Helm chart for the Bitbucket runner autoscaler and supports deploying Bitbucket runner groups, as well as the AWS IAM components needed for Bitbucket runners to authenticate against AWS resources.
+
+[![Terraform validate](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml)
+[![pre-commit](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml)
 
 ---
 
@@ -50,7 +51,7 @@ Refer to the [IAM example](examples/basic/iam.tf) for guidance on creating an as
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_addon"></a> [addon](#module\_addon) | git::https://github.com/lablabs/terraform-aws-eks-universal-addon.git//modules/addon | v0.0.6 |
-| <a name="module_addon-oidc"></a> [addon-oidc](#module\_addon-oidc) | ./modules/addon-oidc | n/a |
+| <a name="module_addon-oidc"></a> [addon-oidc](#module\_addon-oidc) | git::https://github.com/lablabs/terraform-aws-eks-universal-addon.git//modules/addon-oidc | v0.0.7 |
 ## Resources
 
 | Name | Type |
