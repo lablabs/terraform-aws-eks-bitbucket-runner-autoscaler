@@ -1,30 +1,44 @@
 /**
- * # AWS EKS Universal Addon Terraform module
+ * # Bitbucket Runner Autoscaler
  *
- * A Terraform module to deploy the universal addon on Amazon EKS cluster.
+ * This module deploys a Helm chart for the Bitbucket runner autoscaler and supports deploying Bitbucket runner groups, as well as the AWS IAM components needed for Bitbucket runners to authenticate against AWS resources.
  *
- * [![Terraform validate](https://github.com/lablabs/terraform-aws-eks-universal-addon/actions/workflows/validate.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-universal-addon/actions/workflows/validate.yaml)
- * [![pre-commit](https://github.com/lablabs/terraform-aws-eks-universal-addon/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-universal-addon/actions/workflows/pre-commit.yaml)
+ * [![Terraform validate](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml)
+ * [![pre-commit](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml)
  */
-# FIXME config: update addon docs above
+
 locals {
-  # FIXME config: add addon configuration here
   addon = {
-    name = "universal-addon"
-
-    helm_chart_name    = "raw"
+    name               = "bitbucket-runner-autoscaler"
+    namespace          = "bitbucket-runner-autoscaler"
+    helm_release_name  = "bitbucket-runner-autoscaler"
+    helm_chart_name    = "bitbucket-runner-autoscaler"
     helm_chart_version = "0.1.0"
-    helm_repo_url      = "https://lablabs.github.io"
-  }
+    helm_repo_url      = "https://lablabs.github.io/bitbucket-runner-autoscaler-helm-chart/"
 
-  # FIXME config: add addon IRSA configuration here or remove if not needed
-  addon_irsa = {
+    bitbucket_openid_provider_url = "api.bitbucket.org/2.0/workspaces/${var.bitbucket_workspace_name}/pipelines-config/identity/oidc"
+  }
+  addon_oidc = {
     (local.addon.name) = {
-      # FIXME config: add default IRSA overrides here or leave empty if not needed, but make sure to keep at least one key
+      oidc_openid_provider_url                   = local.addon.bitbucket_openid_provider_url
+      oidc_openid_client_ids                     = ["ari:cloud:bitbucket::workspace/${var.bitbucket_workspace_uuid}"]
+      oidc_openid_thumbprints                    = ["a031c46782e6e6c662c2c87c76da9aa62ccabd8e"] # pragma: allowlist secret
+      oidc_assume_role_policy_condition_values   = ["*"]
+      oidc_assume_role_policy_condition_variable = "${local.addon.bitbucket_openid_provider_url}:sub"
+      oidc_assume_role_policy_condition_test     = "StringLike"
     }
   }
 
   addon_values = yamlencode({
-    # FIXME config: add default values here
+    runner = {
+      config = {
+        constants = {
+          default_sleep_time_runner_setup  = 10  # value in seconds
+          default_sleep_time_runner_delete = 5   # value in seconds
+          runner_api_polling_interval      = 600 # value in seconds
+          runner_cool_down_period          = 300 # value in seconds
+        }
+      }
+    }
   })
 }
