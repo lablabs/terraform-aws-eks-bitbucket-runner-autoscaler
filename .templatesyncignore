@@ -4,3 +4,6 @@ main.tf
 variables.tf
 README.md
 .secrets.baseline
+addon-irsa.tf
+variables-addon-irsa.tf
+docs/.addon.md
