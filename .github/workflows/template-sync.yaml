@@ -5,23 +5,73 @@ on:
     - cron: '0 0 * * *' # every day at midnight
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   universal-addon:
     if: github.repository != 'lablabs/terraform-aws-eks-universal-addon'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Install OS dependencies
+        run: sudo apt-get install -y libsqlite3-dev # TODO remove once https://github.com/actions/runner-images/issues/11279 is resolved
 
-      - name: actions-template-sync
+      - name: Generate GitHub App token
+        id: template-sync-app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LARA_TEMPLATE_SYNC_APP_ID }}
+          private-key: ${{ secrets.LARA_TEMPLATE_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.template-sync-app-token.outputs.token }}
+
+      - name: Cache ASDF
+        uses: actions/cache@v4
+        id: asdf-cache
+        with:
+          path: ~/.asdf/
+          key: ${{ runner.os }}-asdf-${{ hashFiles('.tool-versions') }}
+          restore-keys: ${{ runner.os }}-asdf-
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip/
+          key: ${{ runner.os }}-pip-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup ASDF
+        uses: asdf-vm/actions/setup@v3
+        if: ${{ steps.asdf-cache.outputs.cache-hit == 'true' }}
+
+      - name: Install ASDF
+        uses: asdf-vm/actions/install@v3
+        if: ${{ steps.asdf-cache.outputs.cache-hit != 'true' }}
+
+      - name: Reshim installed ASDF tools
+        shell: bash
+        run: asdf reshim
+
+      - name: Sync universal-addon template
         uses: AndreasAugustin/actions-template-sync@v2
         with:
+          github_token: ${{ steps.template-sync-app-token.outputs.token }}
           source_repo_path: lablabs/terraform-aws-eks-universal-addon
           upstream_branch: main
           pr_labels: kind/sync
           pr_branch_name_prefix: "feat/universal-addon-sync"
           pr_title: "feat(sync): sync universal-addon changes"
           pr_commit_msg: "feat(sync): sync universal-addon changes"
+          is_pr_cleanup: true
+
+      - name: Update README.md
+        run: pre-commit run --show-diff-on-failure --color=always terraform_docs --all-files
+
+      - name: Commit and push README.md
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: README.md
+          message: "docs: update README.md"
