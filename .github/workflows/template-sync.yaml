@@ -12,9 +12,6 @@ jobs:
     if: github.repository != 'lablabs/terraform-aws-eks-universal-addon'
     runs-on: ubuntu-24.04
     steps:
-      - name: Install OS dependencies
-        run: sudo apt-get install -y libsqlite3-dev # TODO remove once https://github.com/actions/runner-images/issues/11279 is resolved
-
       - name: Generate GitHub App token
         id: template-sync-app-token
         uses: actions/create-github-app-token@v1
@@ -58,9 +55,9 @@ jobs:
       - name: Sync universal-addon template
         uses: AndreasAugustin/actions-template-sync@v2
         with:
-          github_token: ${{ steps.template-sync-app-token.outputs.token }}
           source_repo_path: lablabs/terraform-aws-eks-universal-addon
           upstream_branch: main
+          target_gh_token: ${{ steps.template-sync-app-token.outputs.token }}
           pr_labels: kind/sync
           pr_branch_name_prefix: "feat/universal-addon-sync"
           pr_title: "feat(sync): sync universal-addon changes"
