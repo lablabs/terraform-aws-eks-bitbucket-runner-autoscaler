@@ -77,7 +77,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Update README.md
-        run: pre-commit run --show-diff-on-failure --color=always terraform_docs --all-files || true
+        run: pre-commit run --show-diff-on-failure --color=always terraform_docs --all-files
 
       - name: Commit and push README.md
         uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
