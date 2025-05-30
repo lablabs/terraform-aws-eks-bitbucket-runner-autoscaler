@@ -41,4 +41,6 @@ locals {
       }
     }
   })
+
+  addon_depends_on = []
 }
