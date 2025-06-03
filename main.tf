@@ -6,7 +6,6 @@
  * [![Terraform validate](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/validate.yaml)
  * [![pre-commit](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/lablabs/terraform-aws-eks-bitbucket-runner-autoscaler/actions/workflows/pre-commit.yaml)
  */
-
 locals {
   addon = {
     name               = "bitbucket-runner-autoscaler"
@@ -18,6 +17,7 @@ locals {
 
     bitbucket_openid_provider_url = "api.bitbucket.org/2.0/workspaces/${var.bitbucket_workspace_name}/pipelines-config/identity/oidc"
   }
+
   addon_oidc = {
     (local.addon.name) = {
       oidc_openid_provider_url                   = local.addon.bitbucket_openid_provider_url
@@ -41,4 +41,6 @@ locals {
       }
     }
   })
+
+  addon_depends_on = []
 }
