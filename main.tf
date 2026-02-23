@@ -13,7 +13,7 @@ locals {
     helm_release_name  = "bitbucket-runner-autoscaler"
     helm_chart_name    = "bitbucket-runner-autoscaler"
     helm_chart_version = "0.4.0"
-    helm_repo_url      = "ghcr.io/lablabs/bitbucket-runner-autoscaler-helm-chart/sync-pipelines"
+    helm_repo_url      = "https://lablabs.github.io/bitbucket-runner-autoscaler-helm-chart/"
 
     bitbucket_openid_provider_url = "api.bitbucket.org/2.0/workspaces/${var.bitbucket_workspace_name}/pipelines-config/identity/oidc"
   }
