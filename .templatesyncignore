@@ -5,7 +5,7 @@ main.tf
 variables.tf
 README.md
 .secrets.baseline
-addon-irsa.tf
-variables-addon-irsa.tf
 .github/workflows/renovate.yaml
 renovate.json
+migrations.tf
+.templatesyncignore.local

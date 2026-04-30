@@ -1,0 +1,3 @@
+examples/basic/iam.tf
+addon-irsa.tf
+variables-addon-irsa.tf
